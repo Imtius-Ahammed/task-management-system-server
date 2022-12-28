@@ -22,7 +22,7 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 
 async function run(){
   try{
-    const taskAddition =client.db('doctorsPortal').collection('taskContainer')
+    const taskAddition =client.db('allTask').collection('taskContainer')
 
 //  get task
     app.get("/allTasks", async (req, res) => {
@@ -38,6 +38,15 @@ async function run(){
       const result = await taskAddition.insertOne(postTask);
       res.send(result);
     });
+
+
+    //get task by email
+    app.get('/allTasks/:email',async(req,res)=>{
+      const email = req.params.email;
+      const query = {email}
+      const user = await taskAddition.findOne(query);
+      res.send(user);
+    })
 
   }
   finally{
