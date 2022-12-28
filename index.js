@@ -40,11 +40,11 @@ async function run(){
     });
 
 
-    //get task by email
+   
     app.get('/allTasks/:email',async(req,res)=>{
       const email = req.params.email;
       const query = {email}
-      const user = await taskAddition.findOne(query);
+      const user = await taskAddition.find(query).toArray();
       res.send(user);
     })
 
