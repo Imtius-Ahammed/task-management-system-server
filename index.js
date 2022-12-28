@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require("dotenv").config();
 
 const app = express();
@@ -22,15 +22,70 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 
 async function run(){
   try{
-    const taskAddition =client.db('allTask').collection('taskContainer')
-
-//  get task
-    app.get("/allTasks", async (req, res) => {
-      const query = {};
-      const cursor = taskAddition.find(query);
-      const tasks = await cursor.toArray();
-      res.send(tasks);
+    const taskAddition =client.db('allTask').collection('taskContainer');
+    const dailyTaskCollection =client.db('allTask').collection('dailyTask');
+    //daily Tasks
+    app.post("/dailyTasks", async (req, res) => {
+      const postDailyTask = req.body;
+      const result = await dailyTaskCollection.insertOne(postDailyTask);
+      res.send(result);
     });
+    
+    //get daily Tasks By Email
+    app.get('/dailyTasks/:email',async(req,res)=>{
+      const email = req.params.email;
+      const query = {email}
+      const user = await dailyTaskCollection.find(query).toArray();
+      res.send(user);
+    })
+    //get Completed Tasks By Role
+    app.get('/daily/:role',async(req,res)=>{
+      const role = req.params.role;
+      const query = {role}
+      const user = await dailyTaskCollection.find(query).toArray();
+      res.send(user);
+    })
+
+    //get all daily Tasks
+    app.get('/dailyTasks',async(req,res)=>{
+      const email = req.params.email;
+      const query = {email}
+      const user = await dailyTaskCollection.find(query).toArray();
+      res.send(user);
+    })
+
+     //complete task 
+
+    
+     app.put('/dailyTasks/:id',async(req,res)=>{
+     
+
+      const id = req.params.id;
+      const filter = { _id: ObjectId(id)}
+      const options = {upsert: true};
+      const updatedDoc ={
+        $set:{
+          role: 'taskCompleted'
+        }
+      }
+      const result = await dailyTaskCollection.updateOne(filter,updatedDoc,options);
+      res.send(result);
+
+    })
+
+    //delete
+
+    app.delete('/dailyTasks/:id', async(req,res)=>{
+      const id = req.params.id;
+      const filter = {
+        _id: ObjectId(id)
+      };
+      const result = await dailyTaskCollection.deleteOne(filter);
+      res.send(result);
+    })
+
+
+
 
 //post task
     app.post("/addTask", async (req, res) => {
@@ -40,13 +95,14 @@ async function run(){
     });
 
 
-   
+   //get allTasks By email
     app.get('/allTasks/:email',async(req,res)=>{
       const email = req.params.email;
       const query = {email}
       const user = await taskAddition.find(query).toArray();
       res.send(user);
     })
+   
 
   }
   finally{
