@@ -102,6 +102,35 @@ async function run(){
       const user = await taskAddition.find(query).toArray();
       res.send(user);
     })
+
+    //get single media Task
+    app.get('/update/:id', async(req,res)=>{
+      const id = req.params.id;
+      const query = {_id: ObjectId(id)};
+      const result = await taskAddition.findOne(query);
+      res.send(result)
+    })
+
+
+    //update function
+    app.put('/update/:id',async(req,res)=>{
+      const id = req.params.id;
+      const filter = {_id: ObjectId(id)};
+      const task= req.body;
+      const option = {upsert:true};
+      const updatedTask = {
+        $set: {
+          name: task.name,
+          email: task.email,
+          taskTitle: task.taskTitle,
+          img: task.img,
+          description: task.description
+        }
+
+      }
+      const result = await taskAddition.updateOne(filter, updatedTask, option);
+      res.send(result);
+    })
    
 
   }
